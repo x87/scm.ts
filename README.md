@@ -1,6 +1,6 @@
 # scm.js
 
-A small library providing some helpful utilites for [CLEO Redux](https://github.com/cleolibrary/CLEO-Redux) scripts.
+A small library providing some helpful utilites for [CLEO Redux](https://github.com/cleolibrary/CLEO-Redux) scripts. Works with GTA III, Vice City and San Andreas. 
 
 ## Usage
 
@@ -61,9 +61,11 @@ TBD
 
 ## SCM
 
+A static object with the following methods:
+
 * `SCM.readVar(id)` - reads the value of the global variable with `id`
 
-* `SCM.writeVar(id)` - writes a new value of the global variable with `id`
+* `SCM.writeVar(id, value)` - writes a new value of the global variable with `id`
 
 
 
