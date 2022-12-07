@@ -1,6 +1,6 @@
 # scm.js
 
-A small library providing some helpful utilites for [CLEO Redux](https://github.com/cleolibrary/CLEO-Redux) scripts. Works with GTA III, Vice City and San Andreas. 
+A small Javacript library providing helpful utilites for [CLEO Redux](https://github.com/cleolibrary/CLEO-Redux) scripts. Works with GTA III, Vice City and San Andreas. 
 
 ## Usage
 
