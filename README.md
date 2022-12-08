@@ -103,9 +103,9 @@ timer.value -= 1000;
 
 A static object with the following methods:
 
-* `SCM.readVar(id)` - reads the value of the global variable with `id`
+* `SCM.readVar(number)` - reads the value of the global variable with the given index
 
-* `SCM.writeVar(id, value)` - writes a new value of the global variable with `id`
+* `SCM.writeVar(number, number)` - writes a new value of the global variable with the given index
 
 
 
