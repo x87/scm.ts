@@ -19,9 +19,9 @@ A helper class to create and manipulate onscreen counters (can be one of the two
 ```js
 const counter = new Counter(350).type(0).display(); // create a new bar counter with initial value of 350
 wait(1000);
-c.value -= 100; // decrement counter's value by 100
+counter.value -= 100; // decrement counter's value by 100
 wait(1000);
-c.clear(); // delete counter
+counter.clear(); // delete counter
 ```
 
 `Counter` constructor accepts a number or an object:
@@ -57,7 +57,47 @@ counter.value--;
 
 ### Timer
 
-TBD
+A helper class to create and manipulate onscreen timers.
+
+```js
+const timer = new Timer(10000).text("My Timer").display(); // create a new timer with initial time of 10 seconds and custom label
+wait(1000);
+timer.freeze(true); // temporarily pause the timer
+wait(1000);
+timer.freeze(false); // continue timer
+wait(1000);
+timer.clear(); // delete timer
+```
+
+`Timer` constructor accepts a number or an object:
+
+- `new Timer(number)` - creates a new Timer with the initial time in ms
+- `new Timer({ direction: number, beepTime: number, text: string, key: string, initialValue: number})` - creates a new Timer with the one or many given options.
+
+Also `Timer` object has methods that can be chained to customize the visual style and behavior of the counter:
+
+* `.direction(number)` - 0 is a countup timer, 1 is a countdown timer (default). Supported since VC.
+* `.beepTime(number)` - time when the timer makes a noise. Only in SA.
+* `.text(string)` - custom text for the counter label (empty by default)
+* `.key(string)` - a GXT key for the counter label
+
+The following calls are equivalent:
+
+```js
+const timer = new Timer(5000).direction(0).text("TIME").display();
+const timer = new Timer({initialValue: 5000, direction: 0, text: 'TIME'}).display();
+```
+
+Customization methods can only be used before `.display()`. When `.display()` method is invoked it returns a new object with the following properties:
+
+* `.value` - a getter/setter for the counter. Can be increased or decreased. Note the the game automatically updates the timer.
+```js
+timer.value += 1000;
+timer.value = 5000;
+timer.value -= 1000;
+```
+* `.freeze(boolean)` - pause/unpause the timer
+* `.clear()` - delete the timer
 
 ## SCM
 
