@@ -90,7 +90,7 @@ const timer = new Timer({initialValue: 5000, direction: 0, text: 'TIME'}).displa
 
 Customization methods can only be used before `.display()`. When `.display()` method is invoked it returns a new object with the following properties:
 
-* `.value` - a getter/setter for the counter. Can be increased or decreased. Note that in each frame the game automatically updates the timer value.
+* `.value` - a getter/setter for the timer. Can be increased or decreased. Note that in each frame the game automatically updates the timer value.
 ```js
 timer.value += 1000;
 timer.value = 5000;
