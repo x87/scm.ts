@@ -1,16 +1,16 @@
-# scm.js
+# scm.ts
 
-A small Javacript library providing helpful utilities for [CLEO Redux](https://github.com/cleolibrary/CLEO-Redux) scripts. Works with GTA III, Vice City and San Andreas. 
+A small TypeScript library providing helpful utilities for [CLEO Redux](https://github.com/cleolibrary/CLEO-Redux) scripts. Works with GTA III, Vice City and San Andreas. 
 
 ## Usage
 
-Copy `scm.js` next to your main script and then import necessary functions:
+Copy `scm.ts` next to your main script and then import necessary functions:
 
 ```js
   import { SCM, Timer, Counter } from './scm';
 ```
 
-`scm.js` requires `mem` [permission](https://re.cleo.li/docs/en/permissions.html). Your script name should include `[mem]`, or the CLEO config should allow `mem`.
+`scm.ts` requires `mem` [permission](https://re.cleo.li/docs/en/permissions.html). Your script name should include `[mem]`, or the CLEO config should allow `mem`.
 
 ## Classes
 
