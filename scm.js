@@ -1,6 +1,4 @@
-/// <reference path="../.config/sa.d.ts" />
-
-// SCM.js v0.1.0
+// SCM.ts v0.2.0
 
 assertCleoVersion("1.0.5");
 assert(isGTA3() || isVC() || isSA(), "Unsupported game");
@@ -8,7 +6,7 @@ assert(isGTA3() || isVC() || isSA(), "Unsupported game");
 // -- SCM
 
 const mainScm = Memory.Translate("CTheScripts::ScriptSpace");
-assert(mainScm, "Main.scm address not found");
+assert(mainScm > 0, "Main.scm address not found");
 
 if (["re3", "reVC"].includes(HOST)) {
   // disable assert in re3 and reVC
@@ -22,12 +20,12 @@ if (["re3", "reVC"].includes(HOST)) {
 const counters = (Memory.ReadI32(mainScm + 3, false, false) + 12) / 4;
 
 const SCM = {
-  readVar(id) {
+  readVar(id: number) {
     assertVar(id);
     return Memory.ReadI32(mainScm + id * 4, false, false);
   },
 
-  writeVar(id, value) {
+  writeVar(id: number, value: number) {
     assertVar(id);
     return Memory.WriteI32(mainScm + id * 4, value, false, false);
   },
@@ -35,62 +33,57 @@ const SCM = {
 
 // -- Counters & Timers --
 
-class DisplayedCounter {
-  #_id;
-  #_customKey;
-  constructor(id, initialValue, customKey) {
-    this.#_id = id;
-    this.#_customKey = customKey;
+class DisplayedValue {
+  constructor(protected _id: number, initialValue: number, protected _customKey: string) {
     this.value = initialValue;
   }
   get value() {
-    return SCM.readVar(this.#_id);
+    return SCM.readVar(this._id);
   }
   set value(value) {
-    SCM.writeVar(this.#_id, value);
-  }
-  clear() {
-    if (this.#_customKey) {
-      FxtStore.delete(this.#_customKey, true);
-    }
-    Hud.ClearCounter(this.#_id);
+    SCM.writeVar(this._id, value);
   }
 }
 
-class DisplayedTimer {
-  #_id;
-  #_customKey;
-  constructor(id, initialValue, customKey) {
-    this.#_id = id;
-    this.#_customKey = customKey;
-    this.value = initialValue;
-  }
-  get value() {
-    return SCM.readVar(this.#_id);
-  }
-  set value(value) {
-    SCM.writeVar(this.#_id, value);
-  }
+class DisplayedCounter extends DisplayedValue {
   clear() {
-    if (this.#_customKey) {
-      FxtStore.delete(this.#_customKey, true);
+    if (this._customKey) {
+      FxtStore.delete(this._customKey, true);
     }
-    Hud.ClearTimer(this.#_id);
+    Hud.ClearCounter(this._id);
   }
-  freeze(state) {
+}
+
+class DisplayedTimer extends DisplayedValue {
+  clear() {
+    if (this._customKey) {
+      FxtStore.delete(this._customKey, true);
+    }
+    Hud.ClearTimer(this._id);
+  }
+  freeze(state: boolean) {
     Hud.FreezeTimer(state);
   }
 }
 
-class Counter {
-  /** @type number 0-number,1-bar */ #_type = 0;
-  /** @type number 1,2,3,4 slot */ #_slot = 1;
-  /** @type string custom label */ #_text = "";
-  /** @type string gxt key */ #_key;
-  /** @type boolean no flash on first appear */ #_noFlash;
-  /** @type number initial value */ #_initialValue = 0;
+interface CounterProps {
+  type?: number;
+  slot?: number;
+  text?: string;
+  key?: string;
+  noFlash?: boolean;
+  initialValue?: number;
+}
 
-  constructor(props = 0) {
+class Counter {
+  private _type = 0;
+  private _slot = 1;
+  private _text = "";
+  private _key: string;
+  private _noFlash: boolean;
+  private _initialValue = 0;
+
+  constructor(props: number | CounterProps = 0) {
     if (typeof props === "object") {
       const { type, slot, text, key, noFlash, initialValue = 0 } = props;
       type && this.type(type);
@@ -98,100 +91,107 @@ class Counter {
       text && this.text(text);
       key && this.key(key);
       noFlash && this.noFlash();
-      this.#_initialValue = initialValue;
+      this._initialValue = initialValue;
     } else {
-      this.#_initialValue = props;
+      this._initialValue = props;
     }
   }
-  type(type) {
-    this.#_type = type;
+  type(type: number) {
+    this._type = type;
     return this;
   }
-  slot(value) {
+  slot(value: number) {
     let slot = Number(value);
     if (slot < 1 || isGTA3()) {
       slot = 1;
     } else if (slot > 4) {
       slot = 4;
     }
-    this.#_slot = slot;
+    this._slot = slot;
     return this;
   }
-  text(text) {
-    this.#_text = text ?? "";
+  text(text: string) {
+    this._text = text ?? "";
     return this;
   }
-  key(key) {
-    this.#_key = key;
+  key(key: string) {
+    this._key = key;
     return this;
   }
   noFlash() {
-    this.#_noFlash = true;
+    this._noFlash = true;
     return this;
   }
 
   display() {
     let customKey = "";
-    if (!this.#_key) {
-      customKey = `__cnts${this.#_slot}`;
+    if (!this._key) {
+      customKey = `__cnts${this._slot}`;
       this.key(customKey);
-      FxtStore.insert(this.#_key, this.#_text, true);
+      FxtStore.insert(this._key, this._text, true);
     }
 
-    const id = counters + this.#_slot;
+    const id = counters + this._slot;
 
     if (isGTA3()) {
-      Hud.DisplayCounterWithString(id, this.#_type, this.#_key);
+      Hud.DisplayCounterWithString(id, this._type, this._key);
     } else {
-      Hud.DisplayNthCounterWithString(id, this.#_type, this.#_slot, this.#_key);
+      Hud.DisplayNthCounterWithString(id, this._type, this._slot, this._key);
     }
 
-    if (isSA() && this.#_noFlash) {
+    if (isSA() && this._noFlash) {
       Hud.SetCounterFlashWhenFirstDisplayed(id, false);
     }
 
-    return new DisplayedCounter(id, this.#_initialValue, customKey);
+    return new DisplayedCounter(id, this._initialValue, customKey);
   }
 }
 
-class Timer {
-  /** @type number 0-Up,1-Down */ #_direction = 1;
-  /** @type number 1,2,3,4 slot */ #_slot = 0;
-  /** @type number time when beeps */ #_beepTime;
-  /** @type string custom label */ #_text = "";
-  /** @type string gxt key */ #_key;
-  /** @type number initial value */ #_initialValue = 0;
+interface TimerProps {
+  direction?: number;
+  beepTime?: number;
+  text?: string;
+  key?: string;
+  initialValue?: number;
+}
 
-  constructor(props = 0) {
+class Timer {
+  private _direction = 1;
+  private _beepTime: number;
+  private _text = "";
+  private _key: string;
+  private _initialValue = 0;
+
+  constructor(props: number | TimerProps = 0) {
     if (typeof props === "object") {
       const { direction, beepTime, text, key, initialValue = 0 } = props;
       this.direction(direction ?? 1);
       beepTime && this.beepTime(beepTime);
       text && this.text(text);
       key && this.key(key);
-      this.#_initialValue = initialValue;
+      this._initialValue = initialValue;
     } else {
-      this.#_initialValue = props;
+      this._initialValue = props;
     }
   }
-  direction(direction) {
-    this.#_direction = direction;
+  direction(direction: number) {
+    this._direction = direction;
     return this;
   }
-  beepTime(value) {
+  beepTime(value: number) {
     if (!isSA()) {
       return this;
     }
     let beepTime = Number(value);
-    this.#_beepTime = beepTime < 0 ? 0 : beepTime;
+    this._beepTime = beepTime < 0 ? 0 : beepTime;
     return this;
   }
-  text(text) {
-    this.#_text = text ?? "";
+  text(text: string) {
+    this._text = text ?? "";
     return this;
   }
-  key(key) {
-    this.#_key = key;
+  key(key: string) {
+    this._key = key;
     return this;
   }
 
@@ -200,22 +200,22 @@ class Timer {
     const id = counters + slot;
     let customKey = "";
 
-    if (!this.#_key) {
+    if (!this._key) {
       customKey = `__cnts${slot}`;
       this.key(customKey);
-      FxtStore.insert(this.#_key, this.#_text, true);
+      FxtStore.insert(this._key, this._text, true);
     }
 
     if (isGTA3()) {
-      Hud.DisplayTimerWithString(id, this.#_key);
+      Hud.DisplayTimerWithString(id, this._key);
     } else {
-      Hud.DisplayTimerWithString(id, this.#_direction, this.#_key);
+      Hud.DisplayTimerWithString(id, this._direction, this._key);
     }
-    if (isSA() && this.#_beepTime) {
-      Hud.SetTimerBeepCountdownTime(id, this.#_beepTime);
+    if (isSA() && this._beepTime) {
+      Hud.SetTimerBeepCountdownTime(id, this._beepTime);
     }
 
-    return new DisplayedTimer(id, this.#_initialValue, customKey);
+    return new DisplayedTimer(id, this._initialValue, customKey);
   }
 }
 
@@ -235,17 +235,17 @@ function isSA() {
   return ["sa", "sa_unreal"].includes(HOST);
 }
 
-function assert(condition, message) {
+function assert(condition: boolean, message: string) {
   if (!condition) {
     throw new Error(message);
   }
 }
 
-function assertVar(id) {
+function assertVar(id: number) {
   assert(id >= 2 && id <= 16383, "Global variable is out of range. Use number between 2 and 16383 (0x3FFF)");
 }
 
-function assertCleoVersion(version) {
+function assertCleoVersion(version: string) {
   const [major, minor, patch] = version.split(".");
   const e = `Minimum required CLEO version: ${version}`;
   assert(CLEO.version.major >= major, e);
