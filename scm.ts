@@ -1,4 +1,4 @@
-// SCM.ts v0.2.0
+// SCM.ts v0.3.0
 
 assertCleoVersion("1.0.5");
 assert(isGTA3() || isVC() || isSA(), "Unsupported game");
@@ -219,7 +219,96 @@ class Timer {
   }
 }
 
-export { SCM, Counter, Timer };
+class Pool {
+  private entities: number;
+  private flags: number;
+  private size: number;
+  private entitySize: number;
+
+  constructor(type: Function) {
+    // https://gist.github.com/x87/56f63042576df7a2426181a1592de352
+    const map = {
+      re3: [
+        [Memory.Translate("CPools::ms_pVehiclePool"), 0x5a8],
+        [Memory.Translate("CPools::ms_pPedPool"), 0x5f4],
+        [Memory.Translate("CPools::ms_pObjectPool"), 0x1b0],
+      ],
+      reVC: [
+        [Memory.Translate("CPools::ms_pVehiclePool"), 0x5dc],
+        [Memory.Translate("CPools::ms_pPedPool"), 0x6d8],
+        [Memory.Translate("CPools::ms_pObjectPool"), 0x1a0],
+      ],
+      gta3: [
+        [0x009430dc, 0x5a8],
+        [0x008f2c60, 0x5f0],
+        [0x00880e28, 0x19c],
+      ],
+      vc: [
+        [0x00a0fde4, 0x5dc],
+        [0x0097f2ac, 0x6d8],
+        [0x0094dbe0, 0x1a0],
+      ],
+      sa: [
+        [0x00b74494, 0xa18],
+        [0x00b74490, 0x7c4],
+        [0x00b7449c, 0x19c],
+      ],
+    };
+    const typeId = this.getTypeIndex(type);
+    let [addr, entitySize] = map[HOST][typeId];
+    this.init(Memory.ReadU32(addr, false), entitySize);
+  }
+
+  getHandle(struct: int) {
+    const index = (struct - this.entities) / this.entitySize;
+    return index * 256 + this.getFlag(index);
+  }
+
+  getEntity(index: int) {
+    return this.entities + index * this.entitySize;
+  }
+
+  getEntities() {
+    var result = [];
+    for (var i = 0; i < this.size; i++) {
+      const isFree = this.getFlag(i) & 0x80;
+      if (!isFree) {
+        result.push(this.getEntity(i));
+      }
+    }
+    return result;
+  }
+
+  private init(addr: number, entitySize: number) {
+    this.entities = Memory.ReadU32(addr + 0, false);
+    this.flags = Memory.ReadU32(addr + 4, false);
+    this.size = Memory.ReadI32(addr + 8, false);
+    this.entitySize = entitySize;
+  }
+
+  private getTypeIndex(klass: Function) {
+    if (klass === Car) {
+      return 0;
+    }
+    if (klass === Char) {
+      return 1;
+    }
+    if (klass === ScriptObject) {
+      return 2;
+    }
+    throw new Error("Unknown type");
+  }
+
+  private getFlag(index: int) {
+    return Memory.ReadU8(this.flags + index, false);
+  }
+}
+
+const VehiclePool = new Pool(Car);
+const PedPool = new Pool(Char);
+const ObjectPool = new Pool(ScriptObject);
+
+export { SCM, Counter, Timer, VehiclePool, PedPool, ObjectPool };
 
 // -- Helpers
 
