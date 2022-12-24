@@ -7,7 +7,7 @@ A small TypeScript library providing helpful utilities for [CLEO Redux](https://
 Copy `scm.ts` next to your main script and then import necessary functions:
 
 ```js
-  import { SCM, Timer, Counter } from './scm';
+  import { SCM, Timer, Counter, VehiclePool, PedPool, ObjectPool } from './scm';
 ```
 
 `scm.ts` requires `mem` [permission](https://re.cleo.li/docs/en/permissions.html). Your script name should include `[mem]`, or the CLEO config should allow `mem`.
@@ -110,4 +110,23 @@ A static object with the following methods:
 * `SCM.writeVar(number, number)` - writes a new value of the global variable with the given index
 
 
+## VehiclePool
 
+A static object with the following methods:
+
+* `VehiclePool.getHandle(number)` - returns a Car handle for the given CVehicle instance address
+* `VehiclePool.getEntities()` - returns an array of existing CVehicle instance addresses. Can be used to iterate over all existing cars
+
+## PedPool
+
+A static object with the following methods:
+
+* `PedPool.getHandle(number)` - returns a Char handle for the given CPed instance address
+* `PedPool.getEntities()` - returns an array of existing CPed instance addresses. Can be used to iterate over all existing peds
+
+## ObjectPool
+
+A static object with the following methods:
+
+* `ObjectPool.getHandle(number)` - returns a ScriptObject handle for the given CObject instance address
+* `ObjectPool.getEntities()` - returns an array of existing CObject instance addresses. Can be used to iterate over all existing objects
