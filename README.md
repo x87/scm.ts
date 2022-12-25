@@ -1,6 +1,14 @@
 # scm.ts
 
 A small TypeScript library providing helpful utilities for [CLEO Redux](https://github.com/cleolibrary/CLEO-Redux) scripts. Works with GTA III, Vice City and San Andreas. 
+- [Usage](#usage)
+- [Classes](#classes)
+  - [Counter](#counter)
+  - [Timer](#timer)
+- [SCM](#scm)
+- [VehiclePool](#vehiclepool)
+- [PedPool](#pedpool)
+- [ObjectPool](#objectpool)
 
 ## Usage
 
