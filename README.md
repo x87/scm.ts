@@ -1,16 +1,6 @@
 # scm.ts
 
 A small TypeScript library providing helpful utilities for [CLEO Redux](https://github.com/cleolibrary/CLEO-Redux) scripts. Works with GTA III, Vice City and San Andreas. 
-- [Usage](#usage)
-- [Classes](#classes)
-  - [Counter](#counter)
-  - [Timer](#timer)
-- [SCM](#scm)
-- [VehiclePool](#vehiclepool)
-- [PedPool](#pedpool)
-- [ObjectPool](#objectpool)
-
-## Usage
 
 Copy `scm.ts` next to your main script and then import necessary functions:
 
@@ -20,9 +10,16 @@ Copy `scm.ts` next to your main script and then import necessary functions:
 
 `scm.ts` requires `mem` [permission](https://re.cleo.li/docs/en/permissions.html). Your script name should include `[mem]`, or the CLEO config should allow `mem`.
 
-## Classes
+---
 
-### Counter
+- [Counter](#counter)
+- [Timer](#timer)
+- [SCM](#scm)
+- [VehiclePool](#vehiclepool)
+- [PedPool](#pedpool)
+- [ObjectPool](#objectpool)
+
+## Counter
 
 A helper class to create and manipulate onscreen counters (can be one of the two types: bars and numbers).
 
@@ -65,7 +62,7 @@ counter.value--;
 * `.clear()` - delete the counter
 
 
-### Timer
+## Timer
 
 A helper class to create and manipulate onscreen timers.
 
