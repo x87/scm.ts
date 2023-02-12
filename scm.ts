@@ -1,4 +1,4 @@
-// SCM.ts v0.3.0
+// SCM.ts v0.3.1
 
 assertCleoVersion("1.0.5");
 assert(isGTA3() || isVC() || isSA(), "Unsupported game");
@@ -337,7 +337,10 @@ function assertVar(id: number) {
 function assertCleoVersion(version: string) {
   const [major, minor, patch] = version.split(".");
   const e = `Minimum required CLEO version: ${version}`;
-  assert(CLEO.version.major >= major, e);
-  assert(CLEO.version.minor >= minor, e);
-  assert(CLEO.version.patch >= patch, e);
+  if (CLEO.version.major > major) { return };
+  if (CLEO.version.major < major) { throw new Error(e) };
+  if (CLEO.version.minor > minor) { return };
+  if (CLEO.version.minor < minor) { throw new Error(e) };
+  if (CLEO.version.patch > patch) { return };
+  if (CLEO.version.patch < patch) { throw new Error(e) };
 }
