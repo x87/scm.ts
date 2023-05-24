@@ -120,6 +120,7 @@ A static object with the following methods:
 A static object with the following methods:
 
 * `VehiclePool.getHandle(number)` - returns a Car handle for the given CVehicle instance address
+* `VehiclePool.getAt(number)` - returns a CVehicle instance address for the given Car handle
 * `VehiclePool.getEntities()` - returns an array of existing CVehicle instance addresses. Can be used to iterate over all existing cars
 
 ## PedPool
@@ -127,6 +128,7 @@ A static object with the following methods:
 A static object with the following methods:
 
 * `PedPool.getHandle(number)` - returns a Char handle for the given CPed instance address
+* `PedPool.getAt(number)` - returns a CPed instance address for the given Char handle
 * `PedPool.getEntities()` - returns an array of existing CPed instance addresses. Can be used to iterate over all existing peds
 
 ## ObjectPool
@@ -134,4 +136,5 @@ A static object with the following methods:
 A static object with the following methods:
 
 * `ObjectPool.getHandle(number)` - returns a ScriptObject handle for the given CObject instance address
+* `ObjectPool.getAt(number)` - returns a CObject instance address for the given ScriptObject handle
 * `ObjectPool.getEntities()` - returns an array of existing CObject instance addresses. Can be used to iterate over all existing objects
