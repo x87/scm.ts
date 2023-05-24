@@ -1,4 +1,4 @@
-// SCM.ts v0.3.1
+// SCM.ts v0.3.2
 
 assertCleoVersion("1.0.5");
 assert(isGTA3() || isVC() || isSA(), "Unsupported game");
@@ -262,6 +262,15 @@ class Pool {
   getHandle(struct: int) {
     const index = (struct - this.entities) / this.entitySize;
     return index * 256 + this.getFlag(index);
+  }
+
+  getAt(handle: int) {
+    const index = handle >> 8;
+    const flag = this.getFlag(index);
+    if (index >= 0 && index < this.size && flag === (handle & 0xff)) {
+      return this.getEntity(index);
+    }
+    return 0;
   }
 
   getEntity(index: int) {
