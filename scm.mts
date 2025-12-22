@@ -1,6 +1,6 @@
 // SCM.ts v0.4.2
 
-assertCleoVersion('1.0.5');
+assertCleoVersion('1.4.2');
 assert(isGTA3() || isVC() || isSA(), 'Unsupported game');
 
 // -- SCM
