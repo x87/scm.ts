@@ -1,33 +1,33 @@
-// SCM.ts v0.4.1
+// SCM.ts v0.4.2
 
-assertCleoVersion("1.0.5");
-assert(isGTA3() || isVC() || isSA(), "Unsupported game");
+assertCleoVersion('1.0.5');
+assert(isGTA3() || isVC() || isSA(), 'Unsupported game');
 
 // -- SCM
 
-const mainScm = Memory.Translate("CTheScripts::ScriptSpace");
-assert(mainScm > 0, "Main.scm address not found");
+const mainScm = Memory.Translate('CTheScripts::ScriptSpace');
+assert(mainScm > 0, 'Main.scm address not found');
 
-if (["re3", "reVC"].includes(HOST)) {
+if (['re3', 'reVC'].includes(HOST)) {
   // disable assert in re3 and reVC
-  const fn = Memory.Translate("CTheScripts::GetPointerToScriptVariable");
+  const fn = Memory.Translate('CTheScripts::GetPointerToScriptVariable');
   Memory.WriteU32(fn + 0, 0x0424448b, true); // mov eax, [esp+4]
   Memory.WriteU16(fn + 4, 0x808d, true); // lea eax, CTheScripts::ScriptSpace[eax]
   Memory.WriteU32(fn + 6, mainScm, true);
   Memory.WriteU8(fn + 10, 0xc3, true); // ret
 }
 
-const counters = (Memory.ReadI32(mainScm + 3, false, false) + 12) / 4;
+const counters = (Memory.ReadI32(mainScm + 3, false) + 12) / 4;
 
 const SCM = {
   readVar(id: number) {
     assertVar(id);
-    return Memory.ReadI32(mainScm + id * 4, false, false);
+    return Memory.ReadI32(mainScm + id * 4, false);
   },
 
   writeVar(id: number, value: number) {
     assertVar(id);
-    return Memory.WriteI32(mainScm + id * 4, value, false, false);
+    return Memory.WriteI32(mainScm + id * 4, value, false);
   },
 
   bind<T>(scmVariables: T): T {
@@ -53,7 +53,6 @@ const SCM = {
       ),
     );
   },
-
 };
 
 // -- Counters & Timers --
@@ -103,13 +102,13 @@ interface CounterProps {
 class Counter {
   private _type = 0;
   private _slot = 1;
-  private _text = "";
+  private _text = '';
   private _key: string;
   private _noFlash: boolean;
   private _initialValue = 0;
 
   constructor(props: number | CounterProps = 0) {
-    if (typeof props === "object") {
+    if (typeof props === 'object') {
       const { type, slot, text, key, noFlash, initialValue = 0 } = props;
       type && this.type(type);
       slot && this.slot(slot);
@@ -136,7 +135,7 @@ class Counter {
     return this;
   }
   text(text: string) {
-    this._text = text ?? "";
+    this._text = text ?? '';
     return this;
   }
   key(key: string) {
@@ -149,7 +148,7 @@ class Counter {
   }
 
   display() {
-    let customKey = "";
+    let customKey = '';
     if (!this._key) {
       customKey = `__cnts${this._slot}`;
       this.key(customKey);
@@ -183,12 +182,12 @@ interface TimerProps {
 class Timer {
   private _direction = 1;
   private _beepTime: number;
-  private _text = "";
+  private _text = '';
   private _key: string;
   private _initialValue = 0;
 
   constructor(props: number | TimerProps = 0) {
-    if (typeof props === "object") {
+    if (typeof props === 'object') {
       const { direction, beepTime, text, key, initialValue = 0 } = props;
       this.direction(direction ?? 1);
       beepTime && this.beepTime(beepTime);
@@ -212,7 +211,7 @@ class Timer {
     return this;
   }
   text(text: string) {
-    this._text = text ?? "";
+    this._text = text ?? '';
     return this;
   }
   key(key: string) {
@@ -223,7 +222,7 @@ class Timer {
   display() {
     const slot = 0;
     const id = counters + slot;
-    let customKey = "";
+    let customKey = '';
 
     if (!this._key) {
       customKey = `__cnts${slot}`;
@@ -254,14 +253,14 @@ class Pool {
     // https://gist.github.com/x87/56f63042576df7a2426181a1592de352
     const map = {
       re3: [
-        [Memory.Translate("CPools::ms_pVehiclePool"), 0x5a8],
-        [Memory.Translate("CPools::ms_pPedPool"), 0x5f4],
-        [Memory.Translate("CPools::ms_pObjectPool"), 0x1b0],
+        [Memory.Translate('CPools::ms_pVehiclePool'), 0x5a8],
+        [Memory.Translate('CPools::ms_pPedPool'), 0x5f4],
+        [Memory.Translate('CPools::ms_pObjectPool'), 0x1b0],
       ],
       reVC: [
-        [Memory.Translate("CPools::ms_pVehiclePool"), 0x5dc],
-        [Memory.Translate("CPools::ms_pPedPool"), 0x6d8],
-        [Memory.Translate("CPools::ms_pObjectPool"), 0x1a0],
+        [Memory.Translate('CPools::ms_pVehiclePool'), 0x5dc],
+        [Memory.Translate('CPools::ms_pPedPool'), 0x6d8],
+        [Memory.Translate('CPools::ms_pObjectPool'), 0x1a0],
       ],
       gta3: [
         [0x009430dc, 0x5a8],
@@ -330,7 +329,7 @@ class Pool {
     if (klass === ScriptObject) {
       return 2;
     }
-    throw new Error("Unknown type");
+    throw new Error('Unknown type');
   }
 
   private getFlag(index: int) {
@@ -345,15 +344,15 @@ const ObjectPool = new Pool(ScriptObject);
 // -- Helpers
 
 function isGTA3() {
-  return ["re3", "gta3", "gta3_unreal"].includes(HOST);
+  return ['re3', 'gta3', 'gta3_unreal'].includes(HOST);
 }
 
 function isVC() {
-  return ["reVC", "vc", "vc_unreal"].includes(HOST);
+  return ['reVC', 'vc', 'vc_unreal'].includes(HOST);
 }
 
 function isSA() {
-  return ["sa", "sa_unreal"].includes(HOST);
+  return ['sa', 'sa_unreal'].includes(HOST);
 }
 
 function assert(condition: boolean, message: string) {
@@ -363,11 +362,11 @@ function assert(condition: boolean, message: string) {
 }
 
 function assertVar(id: number) {
-  assert(id >= 2 && id <= 16383, "Global variable is out of range. Use number between 2 and 16383 (0x3FFF)");
+  assert(id >= 2 && id <= 16383, 'Global variable is out of range. Use number between 2 and 16383 (0x3FFF)');
 }
 
 function assertCleoVersion(version: string) {
-  const [major, minor, patch] = version.split(".");
+  const [major, minor, patch] = version.split('.');
   const e = `Minimum required CLEO version: ${version}`;
   if (CLEO.version.major > major) {
     return;
@@ -390,65 +389,70 @@ function assertCleoVersion(version: string) {
 }
 
 const COLORS = [
-  { name: "Black", rgba: [0, 0, 0, 255] },
-  { name: "White", rgba: [255, 255, 255, 255] },
-  { name: "Red", rgba: [255, 0, 0, 255] },
-  { name: "Lime", rgba: [0, 255, 0, 255] },
-  { name: "Blue", rgba: [0, 0, 255, 255] },
-  { name: "Yellow", rgba: [255, 255, 0, 255] },
-  { name: "Cyan", rgba: [0, 255, 255, 255] },
-  { name: "Magenta", rgba: [255, 0, 255, 255] },
-  { name: "Silver", rgba: [192, 192, 192, 255] },
-  { name: "Gray", rgba: [128, 128, 128, 255] },
-  { name: "Maroon", rgba: [128, 0, 0, 255] },
-  { name: "Olive", rgba: [128, 128, 0, 255] },
-  { name: "Green", rgba: [0, 128, 0, 255] },
-  { name: "Purple", rgba: [128, 0, 128, 255] },
-  { name: "Teal", rgba: [0, 128, 128, 255] },
-  { name: "Navy", rgba: [0, 0, 128, 255] },
-  { name: "Orange", rgba: [255, 165, 0, 255] },
-  { name: "Pink", rgba: [255, 192, 203, 255] },
-  { name: "Brown", rgba: [165, 42, 42, 255] },
-  { name: "Gold", rgba: [255, 215, 0, 255] },
-  { name: "Beige", rgba: [245, 245, 220, 255] },
-  { name: "Coral", rgba: [255, 127, 80, 255] },
-  { name: "Crimson", rgba: [220, 20, 60, 255] },
-  { name: "Indigo", rgba: [75, 0, 130, 255] },
-  { name: "Ivory", rgba: [255, 255, 240, 255] },
-  { name: "Khaki", rgba: [240, 230, 140, 255] },
-  { name: "Lavender", rgba: [230, 230, 250, 255] },
-  { name: "Mint", rgba: [189, 252, 201, 255] },
-  { name: "Peach", rgba: [255, 218, 185, 255] },
-  { name: "Plum", rgba: [221, 160, 221, 255] },
-  { name: "Salmon", rgba: [250, 128, 114, 255] },
-  { name: "SkyBlue", rgba: [135, 206, 235, 255] },
-  { name: "SlateGray", rgba: [112, 128, 144, 255] },
-  { name: "SteelBlue", rgba: [70, 130, 180, 255] },
-  { name: "Tan", rgba: [210, 180, 140, 255] },
-  { name: "Turquoise", rgba: [64, 224, 208, 255] },
-  { name: "Violet", rgba: [238, 130, 238, 255] },
-  { name: "Wheat", rgba: [245, 222, 179, 255] },
-  { name: "Aqua", rgba: [0, 255, 255, 255] },
-  { name: "Chartreuse", rgba: [127, 255, 0, 255] },
-  { name: "DarkBlue", rgba: [0, 0, 139, 255] },
-  { name: "DarkGreen", rgba: [0, 100, 0, 255] },
-  { name: "DarkRed", rgba: [139, 0, 0, 255] },
-  { name: "LightGray", rgba: [211, 211, 211, 255] },
-  { name: "LightBlue", rgba: [173, 216, 230, 255] },
-  { name: "DarkGray", rgba: [169, 169, 169, 255] },
-  { name: "HotPink", rgba: [255, 105, 180, 255] },
-  { name: "DeepSkyBlue", rgba: [0, 191, 255, 255] },
+  { name: 'Black', rgba: [0, 0, 0, 255] },
+  { name: 'White', rgba: [255, 255, 255, 255] },
+  { name: 'Red', rgba: [255, 0, 0, 255] },
+  { name: 'Lime', rgba: [0, 255, 0, 255] },
+  { name: 'Blue', rgba: [0, 0, 255, 255] },
+  { name: 'Yellow', rgba: [255, 255, 0, 255] },
+  { name: 'Cyan', rgba: [0, 255, 255, 255] },
+  { name: 'Magenta', rgba: [255, 0, 255, 255] },
+  { name: 'Silver', rgba: [192, 192, 192, 255] },
+  { name: 'Gray', rgba: [128, 128, 128, 255] },
+  { name: 'Maroon', rgba: [128, 0, 0, 255] },
+  { name: 'Olive', rgba: [128, 128, 0, 255] },
+  { name: 'Green', rgba: [0, 128, 0, 255] },
+  { name: 'Purple', rgba: [128, 0, 128, 255] },
+  { name: 'Teal', rgba: [0, 128, 128, 255] },
+  { name: 'Navy', rgba: [0, 0, 128, 255] },
+  { name: 'Orange', rgba: [255, 165, 0, 255] },
+  { name: 'Pink', rgba: [255, 192, 203, 255] },
+  { name: 'Brown', rgba: [165, 42, 42, 255] },
+  { name: 'Gold', rgba: [255, 215, 0, 255] },
+  { name: 'Beige', rgba: [245, 245, 220, 255] },
+  { name: 'Coral', rgba: [255, 127, 80, 255] },
+  { name: 'Crimson', rgba: [220, 20, 60, 255] },
+  { name: 'Indigo', rgba: [75, 0, 130, 255] },
+  { name: 'Ivory', rgba: [255, 255, 240, 255] },
+  { name: 'Khaki', rgba: [240, 230, 140, 255] },
+  { name: 'Lavender', rgba: [230, 230, 250, 255] },
+  { name: 'Mint', rgba: [189, 252, 201, 255] },
+  { name: 'Peach', rgba: [255, 218, 185, 255] },
+  { name: 'Plum', rgba: [221, 160, 221, 255] },
+  { name: 'Salmon', rgba: [250, 128, 114, 255] },
+  { name: 'SkyBlue', rgba: [135, 206, 235, 255] },
+  { name: 'SlateGray', rgba: [112, 128, 144, 255] },
+  { name: 'SteelBlue', rgba: [70, 130, 180, 255] },
+  { name: 'Tan', rgba: [210, 180, 140, 255] },
+  { name: 'Turquoise', rgba: [64, 224, 208, 255] },
+  { name: 'Violet', rgba: [238, 130, 238, 255] },
+  { name: 'Wheat', rgba: [245, 222, 179, 255] },
+  { name: 'Aqua', rgba: [0, 255, 255, 255] },
+  { name: 'Chartreuse', rgba: [127, 255, 0, 255] },
+  { name: 'DarkBlue', rgba: [0, 0, 139, 255] },
+  { name: 'DarkGreen', rgba: [0, 100, 0, 255] },
+  { name: 'DarkRed', rgba: [139, 0, 0, 255] },
+  { name: 'LightGray', rgba: [211, 211, 211, 255] },
+  { name: 'LightBlue', rgba: [173, 216, 230, 255] },
+  { name: 'DarkGray', rgba: [169, 169, 169, 255] },
+  { name: 'HotPink', rgba: [255, 105, 180, 255] },
+  { name: 'DeepSkyBlue', rgba: [0, 191, 255, 255] },
 ];
 
 type RGBATuple = [number, number, number, number];
-type ColorName = (typeof COLORS)[number]["name"];
+type ColorName = (typeof COLORS)[number]['name'];
 
 class TextDraw {
+  static readonly DEFAULT_SCALE_X = 0.48;
+  static readonly DEFAULT_SCALE_Y = 1.12;
+  static readonly SCREEN_WIDTH = 640.0;
+  static readonly SCREEN_HEIGHT = 448.0;
+
   private _color: () => RGBATuple;
   private _bg: (() => RGBATuple) | undefined;
   private _opacity: ((a: number) => number) | undefined;
   private _alignment = 0;
-  private _width = 640.0;
+  private _width = TextDraw.SCREEN_WIDTH;
   private _scale: (() => [number, number]) | undefined;
   private _scaleX: () => number;
   private _scaleY: () => number;
@@ -456,32 +460,32 @@ class TextDraw {
   private _y: () => number;
   private _pos: () => [number, number];
   private _font = 1;
-  private _case: "normal" | "upper" | "lower" = "normal";
+  private _case: 'normal' | 'upper' | 'lower' = 'normal';
 
   constructor() {
     this.color(255, 255, 255, 255);
     this.x(0);
     this.y(0);
-    this.scale(0.48, 1.12);
+    this.scale(TextDraw.DEFAULT_SCALE_X, TextDraw.DEFAULT_SCALE_Y);
   }
 
   color(
     r: number | ColorName | ((r: number, g: number, b: number, a: number) => RGBATuple),
     g: number = 255,
     b: number = 255,
-    a: number = 255
+    a: number = 255,
   ) {
-    if (typeof r === "function") {
+    if (typeof r === 'function') {
       let prev: RGBATuple = [255, 255, 255, 255];
       this._color = () => {
-        const alpha = typeof this._opacity === "function" ? this._opacity(prev[3]) : prev[3];
+        const alpha = typeof this._opacity === 'function' ? this._opacity(prev[3]) : prev[3];
         prev = r(prev[0], prev[1], prev[2], alpha);
         return this.parseRgba(...prev);
       };
     } else {
       let prev: RGBATuple = this.parseRgba(r, g, b, a);
       this._color = () => {
-        if (typeof this._opacity === "function") {
+        if (typeof this._opacity === 'function') {
           prev[3] = this._opacity(prev[3]);
         }
         return this.parseRgba(...prev);
@@ -498,7 +502,7 @@ class TextDraw {
   opacity(a: number | string | ((prev: number) => number | string)) {
     let prev = 255;
     this._opacity =
-      typeof a === "function" ? () => (prev = this.parseRatio(a(prev), 255)) : () => this.parseRatio(a, 255);
+      typeof a === 'function' ? () => (prev = this.parseRatio(a(prev), 255)) : () => this.parseRatio(a, 255);
     return this;
   }
 
@@ -513,17 +517,17 @@ class TextDraw {
   }
 
   uppercase() {
-    this._case = "upper";
+    this._case = 'upper';
     return this;
   }
 
   lowercase() {
-    this._case = "lower";
+    this._case = 'lower';
     return this;
   }
 
   normalCase() {
-    this._case = "normal";
+    this._case = 'normal';
     return this;
   }
 
@@ -538,15 +542,16 @@ class TextDraw {
   }
 
   maxWidth(value: number | string) {
-    this._width = this.parseRatio(value, 640);
+    this._width = this.parseRatio(value, TextDraw.SCREEN_WIDTH);
     return this;
   }
 
-  scale(x: number | ((x: number, y: number) => [number, number]), y: number) {
+  scale(x: number | string | ((x: number, y: number) => [number | string, number | string]), y: number | string) {
     let prev: [number, number] = [0, 0];
-    if (typeof x === "function") {
+    if (typeof x === 'function') {
       this._scale = () => {
-        prev = x(...prev);
+        const [scaleX, scaleY] = x(...prev);
+        prev = [this.parseRatio(scaleX, TextDraw.DEFAULT_SCALE_X), this.parseRatio(scaleY, TextDraw.DEFAULT_SCALE_Y)];
         return [...prev];
       };
       return this;
@@ -555,15 +560,21 @@ class TextDraw {
     return this.scaleX(x).scaleY(y);
   }
 
-  scaleX(x: number | ((prev: number) => number)) {
+  scaleX(x: number | string | ((prev: number) => number | string)) {
     let prev = 0;
-    this._scaleX = typeof x === "function" ? () => (prev = x(prev)) : () => x;
+    this._scaleX =
+      typeof x === 'function'
+        ? () => (prev = this.parseRatio(x(prev), TextDraw.DEFAULT_SCALE_X))
+        : () => this.parseRatio(x, TextDraw.DEFAULT_SCALE_X);
     return this;
   }
 
-  scaleY(y: number | ((prev: number) => number)) {
+  scaleY(y: number | string | ((prev: number) => number | string)) {
     let prev = 0;
-    this._scaleY = typeof y === "function" ? () => (prev = y(prev)) : () => y;
+    this._scaleY =
+      typeof y === 'function'
+        ? () => (prev = this.parseRatio(y(prev), TextDraw.DEFAULT_SCALE_Y))
+        : () => this.parseRatio(y, TextDraw.DEFAULT_SCALE_Y);
     return this;
   }
 
@@ -571,9 +582,9 @@ class TextDraw {
     r: number | ColorName | ((r: number, g: number, b: number, a: number) => RGBATuple),
     g: number = 255,
     b: number = 255,
-    a: number = 255
+    a: number = 255,
   ) {
-    if (typeof r === "function") {
+    if (typeof r === 'function') {
       let prev: RGBATuple = [128, 128, 128, 128];
       this._bg = () => {
         prev = r(...prev);
@@ -593,22 +604,28 @@ class TextDraw {
 
   x(x: number | string | ((x: number) => number)) {
     let prev = 0;
-    this._x = typeof x === "function" ? () => (prev = this.parseRatio(x(prev), 640)) : () => this.parseRatio(x, 640);
+    this._x =
+      typeof x === 'function'
+        ? () => (prev = this.parseRatio(x(prev), TextDraw.SCREEN_WIDTH))
+        : () => this.parseRatio(x, TextDraw.SCREEN_WIDTH);
     return this;
   }
 
   y(y: number | string | ((y: number) => number)) {
     let prev = 0;
-    this._y = typeof y === "function" ? () => (prev = this.parseRatio(y(prev), 448)) : () => this.parseRatio(y, 448);
+    this._y =
+      typeof y === 'function'
+        ? () => (prev = this.parseRatio(y(prev), TextDraw.SCREEN_HEIGHT))
+        : () => this.parseRatio(y, TextDraw.SCREEN_HEIGHT);
     return this;
   }
 
   pos(x: number | string | ((x: number, y: number) => [number, number]), y: number | string) {
     let prev: [number, number] = [0, 0];
-    if (typeof x === "function") {
+    if (typeof x === 'function') {
       this._pos = () => {
         prev = x(...prev);
-        return [this.parseRatio(prev[0], 640), this.parseRatio(prev[1], 448)];
+        return [this.parseRatio(prev[0], TextDraw.SCREEN_WIDTH), this.parseRatio(prev[1], TextDraw.SCREEN_HEIGHT)];
       };
       return this;
     }
@@ -646,29 +663,29 @@ class TextDraw {
 
     Text.SetWrapX(this._width);
     Text.SetCenterSize(this._width);
-    if (HOST === "sa") {
+    if (HOST === 'sa') {
       Text.SetDropshadow(1, 0, 0, 0, 255);
     }
 
     const [scaleX, scaleY] = this._scale ? this._scale() : [this._scaleX(), this._scaleY()];
     Text.SetScale(scaleX, scaleY);
     const transformedText = (
-      this._case === "upper" ? text.toUpperCase() : this._case === "lower" ? text.toLowerCase() : text
+      this._case === 'upper' ? text.toUpperCase() : this._case === 'lower' ? text.toLowerCase() : text
     ).trimEnd();
 
     const [x, y] = this._pos ? this._pos() : [this._x(), this._y()];
     switch (HOST) {
-      case "re3":
-      case "gta3":
-      case "reVC":
-      case "vc": {
+      case 're3':
+      case 'gta3':
+      case 'reVC':
+      case 'vc': {
         Memory.WriteFloat(addr + 0x24, x, false);
         Memory.WriteFloat(addr + 0x28, y, false);
         Memory.WriteUtf16(addr + 0x2c, transformedText);
         break;
       }
 
-      case "sa": {
+      case 'sa': {
         Text.DisplayFormatted(x, y, transformedText);
         break;
       }
@@ -678,8 +695,8 @@ class TextDraw {
   }
 
   private parseRatio(value: number | string, total: number): number {
-    if (typeof value === "string") {
-      if (value.endsWith("%")) {
+    if (typeof value === 'string') {
+      if (value.endsWith('%')) {
         const percent = parseFloat(value.slice(0, -1));
         return (total * percent) / 100;
       }
@@ -689,9 +706,9 @@ class TextDraw {
   }
 
   private parseRgba(r: number | string, g: number = 255, b: number = 255, a: number = 255): RGBATuple {
-    if (typeof r === "string") {
-      if (r.startsWith("#")) {
-        const hex = r.replace("#", "");
+    if (typeof r === 'string') {
+      if (r.startsWith('#')) {
+        const hex = r.replace('#', '');
         r = parseInt(hex.substring(0, 2), 16);
         g = parseInt(hex.substring(2, 4), 16);
         b = parseInt(hex.substring(4, 6), 16);
@@ -712,14 +729,14 @@ class TextDraw {
   private getInternalTextDraw() {
     const map = {
       re3: [
-        Memory.Translate("CTheScripts::IntroTextLines"),
-        Memory.Translate("CTheScripts::NumberOfIntroTextLinesThisFrame"),
+        Memory.Translate('CTheScripts::IntroTextLines'),
+        Memory.Translate('CTheScripts::NumberOfIntroTextLinesThisFrame'),
         0x414,
         2,
       ],
       reVC: [
-        Memory.Translate("CTheScripts::IntroTextLines"),
-        Memory.Translate("CTheScripts::NumberOfIntroTextLinesThisFrame"),
+        Memory.Translate('CTheScripts::IntroTextLines'),
+        Memory.Translate('CTheScripts::NumberOfIntroTextLinesThisFrame'),
         0xf4,
         48,
       ],

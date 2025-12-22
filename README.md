@@ -220,12 +220,12 @@ new TextDraw()
 - `.alignLeft()` - align text to left (default)
 - `.alignCenter()` - center text
 - `.alignRight()` - align text to right
-- `.maxWidth(value)` - set max width in pixels or percentage
+- `.maxWidth(value)` - set max width in units (`0`-`640`) or percentage (e.g. `.maxWidth("100%")`)
 
 ### Font & Scale
 
 - `.font(number)` - set font style (0-3), corresponds to GTA fonts https://library.sannybuilder.com/#/sa?q=SET_TEXT_FONT
-- `.scale(x, y)` - set text scale
+- `.scale(x, y)` - set text size. can be absolute (`.scale(0.48, 1.12)`) or relative to the default size (`.scale("75%", "150%")`) 
 - `.scaleX(value)` / `.scaleY(value)` - set individual scale
 - `.uppercase()` - transform text to UPPERCASE
 - `.lowercase()` - transform text to lowercase
