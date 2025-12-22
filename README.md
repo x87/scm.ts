@@ -118,6 +118,22 @@ A static object with the following methods:
 
 - `SCM.writeVar(number, number)` - writes a new value of the global variable with the given index
 
+- `SCM.bind(object)` - binds object keys to SCM variables
+
+Example:
+
+```
+const $ = SCM.bind({
+  PLAYER1: 2,
+  SCPLAYER: 3,
+  ONMISSION: 409,
+  SOME_BLIP: new Blip(123)
+});
+
+$.ONMISSION = 1;
+$.SOME_BLIP.remove();
+```
+
 ## VehiclePool
 
 A static object with the following methods:

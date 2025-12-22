@@ -1,4 +1,4 @@
-// SCM.ts v0.4.0
+// SCM.ts v0.4.1
 
 assertCleoVersion("1.0.5");
 assert(isGTA3() || isVC() || isSA(), "Unsupported game");
@@ -29,6 +29,31 @@ const SCM = {
     assertVar(id);
     return Memory.WriteI32(mainScm + id * 4, value, false, false);
   },
+
+  bind<T>(scmVariables: T): T {
+    return Object.defineProperties(
+      { ...scmVariables },
+      Object.fromEntries(
+        Object.entries(scmVariables).map(([key, varId]) => [
+          key,
+          {
+            get() {
+              const value = SCM.readVar(+varId);
+              if (typeof scmVariables[key] === 'object') {
+                // wrap the handle in a class instance
+                return new scmVariables[key].__proto__.constructor(value);
+              }
+              return value;
+            },
+            set(value: number) {
+              SCM.writeVar(+varId, +value);
+            },
+          },
+        ]),
+      ),
+    );
+  },
+
 };
 
 // -- Counters & Timers --
@@ -675,7 +700,7 @@ class TextDraw {
         // prettier-ignore
         for (const color of COLORS) {
           if (color.name.toLowerCase() === r.toLowerCase()) {
-            return [ color.rgba[0], color.rgba[1], color.rgba[2], color.rgba[3] ];
+            return [color.rgba[0], color.rgba[1], color.rgba[2], color.rgba[3]];
           }
         }
         throw new Error(`Unknown color name: ${r}`);
