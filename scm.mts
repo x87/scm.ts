@@ -755,4 +755,4 @@ class TextDraw {
   }
 }
 
-export { SCM, Counter, Timer, VehiclePool, PedPool, ObjectPool, TextDraw };
+export { SCM, Counter, Timer, type DisplayedCounter, type DisplayedTimer, VehiclePool, PedPool, ObjectPool, TextDraw };
