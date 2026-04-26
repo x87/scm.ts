@@ -1,6 +1,6 @@
-// SCM.ts v0.4.2
+// SCM.ts v0.4.3
 
-assertCleoVersion('1.4.2');
+assertCleoVersion('1.4.4');
 assert(isGTA3() || isVC() || isSA(), 'Unsupported game');
 
 // -- SCM
@@ -277,10 +277,37 @@ class Pool {
         [0x00b74490, 0x7c4],
         [0x00b7449c, 0x19c],
       ],
+      
+      // Offsets for Steam 1.0.113.21181
+      gta3_unreal: [
+        [0x53d74a8, 0x7a0], // relative to base
+        [0x53d7470, 0x920], // relative to base
+        [0x53d74b8, 0x2b0], // relative to base
+      ],
+      vc_unreal: [
+        [0x545de30, 0x7b8], // relative to base
+        [0x545de38, 0xb78], // relative to base
+        [0x545de48, 0x270], // relative to base
+      ],
+      sa_unreal: [
+        [0x572b598, 0xdb8], // relative to base
+        [0x572b5a0, 0xb10], // relative to base
+        [0x572b588, 0x248], // relative to base
+      ],
     };
+    
+    const isX64 = ['gta3_unreal', 'vc_unreal', 'sa_unreal'].includes(HOST);
+    const usize = isX64 ? 8 : 4;
+    const readUsize = (from: number, ib = false) => (isX64 ? Memory.ReadU64(from, false, ib) : Memory.ReadU32(from, false));
+    
     const typeId = this.getTypeIndex(type);
-    let [addr, entitySize] = map[HOST][typeId];
-    this.init(Memory.ReadU32(addr, false), entitySize);
+    const [base, entitySize] = map[HOST][typeId];
+    const addr = readUsize(base, true);
+
+    this.entities = readUsize(addr + usize * 0);
+    this.flags = readUsize(addr + usize * 1);
+    this.size = Memory.ReadU32(addr + usize * 2);
+    this.entitySize = entitySize;
   }
 
   getHandle(struct: int) {
@@ -310,13 +337,6 @@ class Pool {
       }
     }
     return result;
-  }
-
-  private init(addr: number, entitySize: number) {
-    this.entities = Memory.ReadU32(addr + 0, false);
-    this.flags = Memory.ReadU32(addr + 4, false);
-    this.size = Memory.ReadI32(addr + 8, false);
-    this.entitySize = entitySize;
   }
 
   private getTypeIndex(klass: Function) {

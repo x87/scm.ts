@@ -1,8 +1,11 @@
 # scm.ts
 
-A small TypeScript library providing helpful utilities for [CLEO Redux](https://github.com/cleolibrary/CLEO-Redux) scripts. Works with GTA III, Vice City and San Andreas.
+A small TypeScript library providing helpful utilities for [CLEO Redux](https://github.com/cleolibrary/CLEO-Redux) scripts. Works with GTA III, Vice City and San Andreas. 
 
-Copy `scm.mts` next to your main script and then import necessary functions:
+`VehiclePool`, `PedPool`, and `ObjectPool` also support version `1.0.113.21181` of The Definitive Edition on Steam.
+
+
+To use the library, copy `scm.mts` next to your main script and then import necessary functions:
 
 ```js
 import { SCM, Timer, Counter, VehiclePool, PedPool, ObjectPool, TextDraw } from "./scm.mts";
