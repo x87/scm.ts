@@ -117,9 +117,10 @@ timer.value -= 1000;
 
 A static object with the following methods:
 
-- `SCM.readVar(number)` - reads the value of the global variable with the given index
-
-- `SCM.writeVar(number, number)` - writes a new value of the global variable with the given index
+- `SCM.readVar(number)` - reads the value of the global integer variable with the given index
+- `SCM.writeVar(number, number)` - writes a new value of the global integer variable with the given index
+- `SCM.readFloat(number)` - reads the value of the global float variable with the given index
+- `SCM.writeFloat(number, number)` - writes a new value of the global float variable with the given index
 
 - `SCM.bind(object)` - binds object keys to SCM variables
 
@@ -130,11 +131,13 @@ const $ = SCM.bind({
   PLAYER1: 2,
   SCPLAYER: 3,
   ONMISSION: 409,
-  SOME_BLIP: new Blip(123)
+  SOME_BLIP: new Blip(123),
+  FLOAT_VAR: SCM.Float(344),
 });
 
 $.ONMISSION = 1;
 $.SOME_BLIP.remove();
+$.FLOAT_VAR = 42.42;
 ```
 
 ## VehiclePool

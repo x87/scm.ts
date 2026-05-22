@@ -1,4 +1,4 @@
-// SCM.ts v0.4.3
+// SCM.ts v0.4.4
 
 assertCleoVersion('1.4.4');
 assert(isGTA3() || isVC() || isSA(), 'Unsupported game');
@@ -19,6 +19,31 @@ if (['re3', 'reVC'].includes(HOST)) {
 
 const counters = (Memory.ReadI32(mainScm + 3, false) + 12) / 4;
 
+abstract class PrimitiveWrapper<T> {
+  constructor(_id: T) {
+    this.valueOf = function () {
+      return _id;
+    };
+  }
+  abstract get value(): T;
+  abstract set value(value: T);
+}
+
+class Float extends PrimitiveWrapper<number> {
+  constructor(id: number) {
+    super(id);
+  }
+  get value() {
+    return SCM.readFloat(+this);
+  }
+  set value(value: number) {
+    SCM.writeFloat(+this, value);
+  }
+  static cast<T>(id: number): T {
+    return new Float(id) as unknown as T;
+  }
+}
+
 const SCM = {
   readVar(id: number) {
     assertVar(id);
@@ -30,6 +55,16 @@ const SCM = {
     return Memory.WriteI32(mainScm + id * 4, value, false);
   },
 
+  readFloat(id: number) {
+    assertVar(id);
+    return Memory.ReadFloat(mainScm + id * 4, false);
+  },
+
+  writeFloat(id: number, value: number) {
+    assertVar(id);
+    return Memory.WriteFloat(mainScm + id * 4, value, false);
+  },
+
   bind<T>(scmVariables: T): T {
     return Object.defineProperties(
       { ...scmVariables },
@@ -38,6 +73,9 @@ const SCM = {
           key,
           {
             get() {
+              if (scmVariables[key] instanceof PrimitiveWrapper) {
+                return scmVariables[key].value;
+              }
               const value = SCM.readVar(+varId);
               if (typeof scmVariables[key] === 'object') {
                 // wrap the handle in a class instance
@@ -46,13 +84,19 @@ const SCM = {
               return value;
             },
             set(value: number) {
-              SCM.writeVar(+varId, +value);
+              if (scmVariables[key] instanceof PrimitiveWrapper) {
+                scmVariables[key].value = value;
+              } else {
+                SCM.writeVar(+varId, +value);
+              }
             },
           },
-        ]),
-      ),
+        ])
+      )
     );
   },
+
+  Float: Float.cast<number>,
 };
 
 // -- Counters & Timers --
