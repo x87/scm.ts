@@ -1,4 +1,4 @@
-// SCM.ts v0.4.4
+// SCM.ts v0.5.0
 
 assertCleoVersion('1.4.4');
 assert(isGTA3() || isVC() || isSA(), 'Unsupported game');
@@ -65,8 +65,8 @@ const SCM = {
     return Memory.WriteFloat(mainScm + id * 4, value, false);
   },
 
-  bind<T>(scmVariables: T): T {
-    return Object.defineProperties(
+  bind<T>(scmVariables: T): T & { $id: { [K in keyof T]: number } } {
+    let obj =  Object.defineProperties(
       { ...scmVariables },
       Object.fromEntries(
         Object.entries(scmVariables).map(([key, varId]) => [
@@ -94,6 +94,23 @@ const SCM = {
         ])
       )
     );
+
+    // expose variable ids for advanced use cases (e.g. Timer/Counter using a global variable id)
+    obj.$id = Object.defineProperties(
+      { ...scmVariables },
+      Object.fromEntries(
+        Object.entries(scmVariables).map(([key]) => [
+          key,
+          {
+            get() {
+              return +scmVariables[key];
+            },
+          },
+        ])
+      )
+    );
+
+    return obj;
   },
 
   Float: Float.cast<number>,
@@ -191,15 +208,13 @@ class Counter {
     return this;
   }
 
-  display() {
+  display(id = counters + this._slot) {
     let customKey = '';
     if (!this._key) {
       customKey = `__cnts${this._slot}`;
       this.key(customKey);
       FxtStore.insert(this._key, this._text, true);
     }
-
-    const id = counters + this._slot;
 
     if (isGTA3()) {
       Hud.DisplayCounterWithString(id, this._type, this._key);
@@ -263,9 +278,8 @@ class Timer {
     return this;
   }
 
-  display() {
+  display(id = counters) {
     const slot = 0;
-    const id = counters + slot;
     let customKey = '';
 
     if (!this._key) {

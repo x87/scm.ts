@@ -67,6 +67,21 @@ counter.value--;
 
 - `.clear()` - delete the counter
 
+Note on `.display(id)`
+
+`.display()` also accepts an explicit SCM variable id. Pass either a numeric global index or the bound id provided by `SCM.bind()` via the `.$id` property. This lets you display the counter on any SCM global variable instead of relying on implicit slots.
+
+Example:
+
+```js
+const $ = SCM.bind({ MY_COUNTER: 500 });
+$.MY_COUNTER = 10;
+// The following calls are equivalent and will display the same counter on screen with the value of 10:
+Hud.DisplayCounter($.$id.MY_COUNTER);
+new Counter().display($.$id.MY_COUNTER);
+new Counter().display(500);
+```
+
 ## Timer
 
 A helper class to create and manipulate onscreen timers.
@@ -113,6 +128,22 @@ timer.value -= 1000;
 - `.freeze(boolean)` - pause/unpause the timer
 - `.clear()` - delete the timer
 
+Note on `.display(id)`
+
+`.display()` also accepts an explicit SCM variable id. Use a numeric id or the bound id from `SCM.bind()` (`.$id`) to control which SCM variable backs the timer.
+
+Example:
+
+```js
+const $ = SCM.bind({ timer_as3: 600 });
+$.timer_as3 = 5000;
+
+// The following calls are equivalent and will display the same timer on screen with the value of 5 seconds:
+Hud.DisplayTimer($.$id.timer_as3);
+new Timer().display($.$id.timer_as3);
+new Timer().display(600);
+```
+
 ## SCM
 
 A static object with the following methods:
@@ -138,6 +169,18 @@ const $ = SCM.bind({
 $.ONMISSION = 1;
 $.SOME_BLIP.remove();
 $.FLOAT_VAR = 42.42;
+```
+
+Notes on the special `.$id` property
+
+When you call `SCM.bind()` it returns a convenience object that maps your keys to readable properties (as shown above). The returned object also contains a special property named `.$id` which holds the raw SCM variable identifiers for each bound key. This is useful when you need to pass the underlying SCM variable reference to native commands expecting a global variable.
+
+```js
+native("DECLARE_MISSION_FLAG", $.$id.flag_player_on_mission);
+
+$.timer = 5000;
+Hud.DisplayTimer($.$id.timer);
+Hud.ClearTimer($.$id.timer);
 ```
 
 ## VehiclePool
