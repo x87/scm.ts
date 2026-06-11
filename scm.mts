@@ -1,4 +1,4 @@
-// SCM.ts v0.5.0
+// SCM.ts v0.5.1
 
 assertCleoVersion('1.5.0');
 assert(isGTA3() || isVC() || isSA(), 'Unsupported game');
@@ -833,4 +833,10 @@ class TextDraw {
   }
 }
 
-export { SCM, Counter, Timer, type DisplayedCounter, type DisplayedTimer, VehiclePool, PedPool, ObjectPool, TextDraw };
+const CTimer_ms_fTimeStep = Memory.Translate('CTimer::ms_fTimeStep');
+
+function timed(value: number) {
+  return value * Memory.ReadFloat(CTimer_ms_fTimeStep, false);
+}
+
+export { SCM, Counter, Timer, type DisplayedCounter, type DisplayedTimer, VehiclePool, PedPool, ObjectPool, TextDraw, timed };

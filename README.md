@@ -1,9 +1,8 @@
 # scm.ts
 
-A small TypeScript library providing helpful utilities for [CLEO Redux](https://github.com/cleolibrary/CLEO-Redux) scripts. Works with GTA III, Vice City and San Andreas. 
+A small TypeScript library providing helpful utilities for [CLEO Redux](https://github.com/cleolibrary/CLEO-Redux) scripts. Works with GTA III, Vice City and San Andreas.
 
 `VehiclePool`, `PedPool`, and `ObjectPool` also support version `1.0.113.21181` of The Definitive Edition on Steam.
-
 
 To use the library, copy `scm.mts` next to your main script and then import necessary functions:
 
@@ -22,6 +21,7 @@ import { SCM, Timer, Counter, VehiclePool, PedPool, ObjectPool, TextDraw } from 
 - [PedPool](#pedpool)
 - [ObjectPool](#objectpool)
 - [TextDraw](#textdraw)
+- [Timed](#timed)
 
 ## Counter
 
@@ -274,7 +274,7 @@ new TextDraw()
 ### Font & Scale
 
 - `.font(number)` - set font style (0-3), corresponds to GTA fonts https://library.sannybuilder.com/#/sa?q=SET_TEXT_FONT
-- `.scale(x, y)` - set text size. can be absolute (`.scale(0.48, 1.12)`) or relative to the default size (`.scale("75%", "150%")`) 
+- `.scale(x, y)` - set text size. can be absolute (`.scale(0.48, 1.12)`) or relative to the default size (`.scale("75%", "150%")`)
 - `.scaleX(value)` / `.scaleY(value)` - set individual scale
 - `.uppercase()` - transform text to UPPERCASE
 - `.lowercase()` - transform text to lowercase
@@ -354,4 +354,31 @@ const rainbow = new TextDraw().color((_, __, ___, a) => {
 });
 
 rainbow.draw("RAINBOW TEXT EFFECT");
+```
+
+## Timed
+
+A helper function that scales a value by the current game frame timestep, making animations and movements independent of the frame rate.
+
+- `timed(value)` - returns `value * CTimer::ms_fTimeStep`.
+
+The result is automatically adjusted based on the current frame rate. At lower frame rates the returned value is larger; at higher frame rates it is smaller.
+
+```js
+let x = 0.0;
+
+while (true) {
+  wait(0);
+  x += timed(0.04);
+}
+```
+
+This is equivalent to the following SCM code:
+
+```
+float x = 0.0
+while true
+  wait 0
+  x +=@ 0.04
+end
 ```
